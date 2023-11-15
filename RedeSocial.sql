@@ -78,7 +78,7 @@ CREATE TABLE IF NOT EXISTS PedidosAdesao (
     dataPedido datetime DEFAULT CURRENT_TIMESTAMP,
     dataAceitacao datetime,
     FOREIGN KEY (idGrupo) REFERENCES Grupo(id) ON DELETE CASCADE,
-    FOREIGN KEY (idUtilizador) REFERENCES Utilizadores(id)
+    FOREIGN KEY (idUtilizador) REFERENCES Utilizadores(id),
     PRIMARY KEY (idGrupo, idUtilizador)
     );
 CREATE TRIGGER IF NOT EXISTS trigger_pedidos_aceites
@@ -88,7 +88,7 @@ CREATE TRIGGER IF NOT EXISTS trigger_pedidos_aceites
         INSERT INTO GrupoMembros (idGrupo, idUtilizador)
         VALUES (NEW.idGrupo, NEW.idUtilizador);
     END;
-CREATE TABLE IF NOT EXISTS PARTILHA(
+CREATE TABLE IF NOT EXISTS Partilha(
     idPost integer NOT NULL,   
     idUtilizador integer NOT NULL,
     idUtilizadorDestino integer NOT NULL,
@@ -112,4 +112,21 @@ CREATE TABLE IF NOT EXISTS Comentario(
     conteudo text(255) NOT NULL,
     FOREIGN KEY (idPost) REFERENCES Posts(id) ON DELETE CASCADE,
     FOREIGN KEY (idUtilizador) REFERENCES Utilizadores(id)
+);
+CREATE TABLE IF NOT EXISTS Interesses(
+    topico NOT NULL PRIMARY KEY
+);
+CREATE TABLE IF NOT EXISTS RecomendacoesPosts(
+    topicos NOT NULL,
+    post NOT NULL,
+    FOREIGN KEY (post) REFERENCES Posts(id) ON DELETE CASCADE,
+    FOREIGN KEY (topicos) REFERENCES Interesses(topico),
+    PRIMARY KEY(topicos, post)
+);
+CREATE TABLE IF NOT EXISTS InteressesUtilizador(
+    topicos NOT NULL,
+    utilizador NOT NULL,
+    FOREIGN KEY (utilizador) REFERENCES Utilizadores(id),
+    FOREIGN KEY (topicos) REFERENCES Interesses(topico),
+    PRIMARY KEY(topicos, utilizador)
 );
