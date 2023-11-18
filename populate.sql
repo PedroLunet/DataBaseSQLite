@@ -107,12 +107,12 @@ ORDER BY
 LIMIT 100; -- Adjust the limit based on the number of follows you want to generate
 INSERT INTO Posts (visualizacoes, idUtilizador, idGrupo, texto, imagem, video)
 SELECT
-    SUBSTR(RANDOM()>=0, 1, 255) AS visualizacoes,
+    1 + ABS(RANDOM() % 1000000) AS visualizacoes,
     U.id AS idUtilizador,
     G.id AS idGrupo,
-    SUBSTR('Post text ' || RANDOM(), 1, 255) AS texto,
-    SUBSTR('image_url_' || ROUND(RANDOM() * 10) || '.jpg', 1, 255) AS imagem,
-    SUBSTR('video_url_' || ROUND(RANDOM() * 10) || '.mp4', 1, 255) AS video
+    CASE WHEN RANDOM() > 0.5 THEN SUBSTR('Post text ' || RANDOM(), 1, 255) ELSE NULL END AS texto,
+    CASE WHEN RANDOM() > 0.5 THEN SUBSTR('image_url_' || ROUND(RANDOM() * 10) || '.jpg', 1, 255) ELSE NULL END AS imagem,
+    CASE WHEN RANDOM() > 0.5 THEN SUBSTR('video_url_' || ROUND(RANDOM() * 10) || '.mp4', 1, 255) ELSE NULL END AS video
 FROM
     Utilizadores U
 JOIN
@@ -122,11 +122,14 @@ JOIN
 ORDER BY
     RANDOM()
 LIMIT 30;
-INSERT INTO PedidosAdesao (idGrupo, idUtilizador, dataPedido)
+
+
+INSERT INTO PedidosAdesao (idGrupo, idUtilizador, dataPedido, dataAceitacao)
 SELECT
     G.id AS idGrupo,
     U.id AS idUtilizador,
-    CURRENT_TIMESTAMP AS dataPedido
+    CURRENT_TIMESTAMP AS dataPedido,
+    CASE WHEN GM.idGrupo IS NOT NULL THEN CURRENT_TIMESTAMP ELSE NULL END AS dataAceitacao
 FROM
     Utilizadores U
 CROSS JOIN
@@ -135,7 +138,6 @@ LEFT JOIN
     GrupoMembros GM ON G.id = GM.idGrupo AND U.id = GM.idUtilizador
 WHERE
     G.statusAcesso = true
-    AND GM.idGrupo IS NULL -- User is not already a member of the group
 ORDER BY
     RANDOM()
 LIMIT 20;
