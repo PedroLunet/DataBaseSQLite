@@ -67,7 +67,7 @@ CREATE TABLE IF NOT EXISTS Grupo (
     foto TEXT NOT NULL,
     dataCriacao datetime DEFAULT CURRENT_TIMESTAMP,
     creator INTEGER NOT NULL,
-    statusAcesso boolean NOT NULL,
+    statusAcesso INTEGER NOT NULL,  
     FOREIGN KEY (creator) REFERENCES Utilizadores(id) ON UPDATE CASCADE
     );
 CREATE TABLE IF NOT EXISTS GrupoMembros (
@@ -128,7 +128,7 @@ CREATE TABLE IF NOT EXISTS Interesses(
     topico TEXT NOT NULL PRIMARY KEY
 );
 
-CREATE TABLE IF NOT EXISTS RecomendacoesPosts (
+CREATE TABLE IF NOT EXISTS TopicosPosts (
   id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
   topicos TEXT NOT NULL,
   post INTEGER NOT NULL,
