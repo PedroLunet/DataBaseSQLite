@@ -76,21 +76,36 @@ LIMIT 50;
 -- Insert random messages between users
 INSERT INTO Mensagens (idUtilizador, idUtilizadorDestinatario, mensagem, estadoEnvio, estadoVisualizacao, dataEnvio)
 SELECT
-    U1.id AS idUtilizador,
-    U2.id AS idUtilizadorDestinatario,
-    SUBSTR('Random message ' || RANDOM() || ' between users ' || U1.id || ' and ' || U2.id, 1, 255) AS mensagem,
-    true AS estadoEnvio,
-    false AS estadoVisualizacao,
-    CURRENT_TIMESTAMP AS dataEnvio
-FROM
-    Utilizadores U1
-CROSS JOIN
-    Utilizadores U2
-WHERE
-    U1.id <> U2.id -- Exclude self-messages
-ORDER BY
-    RANDOM()
-LIMIT 100; -- Adjust the limit based on the number of messages you want to generate
+    idUtilizador,
+    idUtilizadorDestinatario,
+    mensagem,
+    estadoEnvio,
+    CASE
+        WHEN estadoEnvio = 1 AND ROUND(RANDOM()) > 0 THEN 1
+        ELSE 0
+    END AS estadoVisualizacao,
+    dataEnvio
+FROM (
+    SELECT
+        U1.id AS idUtilizador,
+        U2.id AS idUtilizadorDestinatario,
+        SUBSTR('Random message ' || RANDOM() || ' between users ' || U1.id || ' and ' || U2.id, 1, 255) AS mensagem,
+        ROUND(RANDOM()) > 0 AS estadoEnvio,
+        datetime(strftime('%s', '2020-01-01 00:00:00') +
+                abs(random() % (strftime('%s', '2023-11-19 23:59:59') -
+                                strftime('%s', '2020-01-01 00:00:00'))
+                   ),
+                'unixepoch') AS dataEnvio
+    FROM
+        Utilizadores U1
+    CROSS JOIN
+        Utilizadores U2
+    WHERE
+        U1.id <> U2.id -- Exclude self-messages
+    ORDER BY
+        RANDOM()
+    LIMIT 100
+) AS subquery;-- Adjust the limit based on the number of messages you want to generate
 
 INSERT INTO Seguidores (Utilizador, UtilizadorSeguido)
 SELECT
@@ -140,7 +155,11 @@ INSERT INTO PedidosAdesao (idGrupo, idUtilizador, dataPedido, dataAceitacao)
 SELECT
     G.id AS idGrupo,
     U.id AS idUtilizador,
-    CURRENT_TIMESTAMP AS dataPedido,
+        datetime(strftime('%s', '2020-01-01 00:00:00') +
+                abs(random() % (strftime('%s', '2023-11-19 23:59:59') -
+                                strftime('%s', '2020-01-01 00:00:00'))
+                   ),
+                'unixepoch') AS dataPedido,
     CASE WHEN GM.idGrupo IS NOT NULL THEN CURRENT_TIMESTAMP ELSE NULL END AS dataAceitacao
 FROM
     Utilizadores U
@@ -167,7 +186,7 @@ JOIN
     Utilizadores UD ON U.id <> UD.id -- Exclude self-shares
 ORDER BY
     RANDOM()
-LIMIT 20; -- Adjust the limit based on the number of shares you want to generate
+LIMIT 20; 
 
 INSERT INTO Gosto (idPost, idUtilizador)
 SELECT
@@ -185,7 +204,7 @@ INSERT INTO Comentario (idPost, idUtilizador, conteudo, data)
 SELECT
     P.id AS idPost,
     U.id AS idUtilizador,
-    SUBSTR('Random comment on post ' || P.id || ' by user ' || U.id, 1, 255) AS conteudo,
+    SUBSTR('Random comment'|| random() ||  ' on post ' || P.id || ' by user ' || U.id, 1, 255) AS conteudo,
     CURRENT_TIMESTAMP AS data
 FROM
     Posts P
@@ -218,16 +237,16 @@ VALUES
     ('DIY'),
     ('Fashion Design');
 
-INSERT INTO RecomendacoesPosts (topicos, post)
+INSERT INTO TopicosPosts (topicos, post)
 SELECT
     I.topico AS topicos,
     P.id AS post
 FROM
     Interesses I
-CROSS JOIN
+LEFT JOIN
     Posts P
-WHERE
-    RANDOM() < 0.10 -- 10% chance of having a given interest
+ON
+    RANDOM() < (RANDOM()/1000) 
 ORDER BY
     P.id, RANDOM();
 
@@ -236,11 +255,13 @@ SELECT
     I.topico AS topicos,
     U.id AS utilizador
 FROM
-    Utilizadores U 
-JOIN
     Interesses I 
+LEFT JOIN
+    Utilizadores U
+ON
+    RANDOM() < (RANDOM()/5) 
 ORDER BY
-    U.id, RANDOM();
+    U.id, RANDOM(); 
 
 
 INSERT INTO GrupoModeradores (idGrupo, idUtilizador)
@@ -255,13 +276,14 @@ ORDER BY
 INSERT INTO GrupoModeradores (idGrupo, idUtilizador)
 SELECT
     G.id AS idGrupo,
-    U.id AS idUtilizador
+    GM.idUtilizador AS idUtilizador
 FROM
     Grupo G
 CROSS JOIN
-    Utilizadores U
+    GrupoMembros GM
 WHERE 
-    G.creator <> U.id -- Exclude group creator
+    G.creator <> GM.idUtilizador AND-- Exclude group creator
+    G.id = GM.idGrupo 
 ORDER BY
     RANDOM()
 LIMIT 15;

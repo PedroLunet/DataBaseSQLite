@@ -79,7 +79,7 @@ CREATE TABLE IF NOT EXISTS GrupoMembros (
     UNIQUE (idGrupo, idUtilizador)
 );
 CREATE TABLE IF NOT EXISTS GrupoModeradores (
-    id inchrome-extension://efaidnbmnnnibpcajpcglclefindmkaj/https://moodle2324.up.pt/pluginfile.php/103816/mod_resource/content/1/MD_test.pdfeger NOT NULL PRIMARY KEY AUTOINCREMENT,
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     idGrupo integer NOT NULL,
     idUtilizador integer NOT NULL,
     FOREIGN KEY (idGrupo) REFERENCES Grupo(id) ON DELETE CASCADE,
@@ -127,7 +127,7 @@ CREATE TABLE IF NOT EXISTS Comentario(
 CREATE TABLE IF NOT EXISTS Interesses(
     topico TEXT NOT NULL PRIMARY KEY
 );
-CREATE TABLE IF NOT EXISTS RecomendacoesPosts(
+CREATE TABLE IF NOT EXISTS TopicosPosts(
     id integer NOT NULL PRIMARY KEY AUTOINCREMENT,
     topicos TEXT NOT NULL,
     post INTEGER NOT NULL,
