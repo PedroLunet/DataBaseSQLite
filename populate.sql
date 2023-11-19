@@ -105,20 +105,32 @@ WHERE
 ORDER BY
     RANDOM()
 LIMIT 100; -- Adjust the limit based on the number of follows you want to generate
+
 INSERT INTO Posts (visualizacoes, idUtilizador, idGrupo, texto, imagem, video)
 SELECT
     1 + ABS(RANDOM() % 1000000) AS visualizacoes,
     U.id AS idUtilizador,
     G.id AS idGrupo,
-    CASE WHEN RANDOM() > 0.5 THEN SUBSTR('Post text ' || RANDOM(), 1, 255) ELSE NULL END AS texto,
-    CASE WHEN RANDOM() > 0.5 THEN SUBSTR('image_url_' || ROUND(RANDOM() * 10) || '.jpg', 1, 255) ELSE NULL END AS imagem,
-    CASE WHEN RANDOM() > 0.5 THEN SUBSTR('video_url_' || ROUND(RANDOM() * 10) || '.mp4', 1, 255) ELSE NULL END AS video
+    CASE 
+        WHEN RANDOM() > 0.5 THEN SUBSTR('Post text ' || RANDOM(), 1, 255) 
+        ELSE NULL 
+    END AS texto,
+    CASE 
+        WHEN RANDOM() > 0.5 THEN SUBSTR('image_url_' || CAST(ROUND(RANDOM() * 10) AS TEXT) || '.jpg', 1, 255) 
+        ELSE NULL 
+    END AS imagem,
+    CASE 
+        WHEN RANDOM() > 0.5 THEN SUBSTR('video_url_' || CAST(ROUND(RANDOM() * 10) AS TEXT) || '.mp4', 1, 255) 
+        ELSE NULL 
+    END AS video
 FROM
     Utilizadores U
 JOIN
     GrupoMembros GM ON U.id = GM.idUtilizador
 JOIN
     Grupo G ON GM.idGrupo = G.id
+WHERE
+    texto IS NOT NULL OR imagem IS NOT NULL OR video IS NOT NULL
 ORDER BY
     RANDOM()
 LIMIT 30;
@@ -141,6 +153,7 @@ WHERE
 ORDER BY
     RANDOM()
 LIMIT 20;
+
 INSERT INTO Partilha (idPost, idUtilizador, idUtilizadorDestino)
 SELECT
     P.id AS idPost,
@@ -155,6 +168,7 @@ JOIN
 ORDER BY
     RANDOM()
 LIMIT 20; -- Adjust the limit based on the number of shares you want to generate
+
 INSERT INTO Gosto (idPost, idUtilizador)
 SELECT
     P.id AS idPost,
@@ -166,6 +180,7 @@ JOIN
 ORDER BY
     RANDOM()
 LIMIT 30;
+
 INSERT INTO Comentario (idPost, idUtilizador, conteudo, data)
 SELECT
     P.id AS idPost,
@@ -179,6 +194,7 @@ JOIN
 ORDER BY
     RANDOM()
 LIMIT 30;
+
 INSERT INTO Interesses (topico)
 VALUES
     ('Technology'),
@@ -214,18 +230,28 @@ WHERE
     RANDOM() < 0.10 -- 10% chance of having a given interest
 ORDER BY
     P.id, RANDOM();
+
 INSERT INTO InteressesUtilizador (topicos, utilizador)
 SELECT
     I.topico AS topicos,
     U.id AS utilizador
 FROM
-    Interesses I
-CROSS JOIN
-    Utilizadores U
-WHERE
-    RANDOM() < 0.20 -- 20% chance of having a given interest
+    Utilizadores U 
+JOIN
+    Interesses I 
 ORDER BY
     U.id, RANDOM();
+
+
+INSERT INTO GrupoModeradores (idGrupo, idUtilizador)
+SELECT
+    G.id AS idGrupo,
+    G.creator AS idUtilizador
+FROM
+    Grupo G
+ORDER BY
+    RANDOM();
+
 INSERT INTO GrupoModeradores (idGrupo, idUtilizador)
 SELECT
     G.id AS idGrupo,
@@ -234,6 +260,8 @@ FROM
     Grupo G
 CROSS JOIN
     Utilizadores U
+WHERE 
+    G.creator <> U.id -- Exclude group creator
 ORDER BY
     RANDOM()
 LIMIT 15;

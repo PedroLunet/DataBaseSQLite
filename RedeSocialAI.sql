@@ -1,0 +1,147 @@
+PRAGMA foreign_keys = ON;
+
+DROP TABLE IF EXISTS Mensagens;
+DROP TABLE IF EXISTS Seguidores;
+DROP TABLE IF EXISTS Posts;
+DROP TABLE IF EXISTS Grupo;
+DROP TABLE IF EXISTS GrupoMembros;
+DROP TABLE IF EXISTS GrupoModeradores;
+DROP TABLE IF EXISTS PedidosAdesao;
+DROP TABLE IF EXISTS Partilha;
+DROP TABLE IF EXISTS Gosto;
+DROP TABLE IF EXISTS Comentario;
+DROP TABLE IF EXISTS RecomendacoesPosts;
+DROP TABLE IF EXISTS InteressesUtilizador;
+DROP TABLE IF EXISTS Interesses;
+DROP TABLE IF EXISTS Utilizadores;
+
+CREATE TABLE Utilizadores (
+  id INTEGER NOT NULL PRIMARY KEY,
+  nomeUtilizador TEXT NOT NULL UNIQUE,
+  email TEXT NOT NULL UNIQUE,
+  primeiroNome TEXT NOT NULL,
+  ultimoNome TEXT NOT NULL,
+  dataNascimento DATE NOT NULL,
+  localizacao TEXT NOT NULL,
+  descricao TEXT NOT NULL,
+  statusVerificado INTEGER NOT NULL,
+  fotoPerfil TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS Mensagens (
+  id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+  idUtilizador INTEGER NOT NULL,
+  idUtilizadorDestinatario INTEGER NOT NULL,
+  mensagem TEXT NOT NULL,
+  estadoEnvio INTEGER NOT NULL,
+  estadoVisualizacao INTEGER NOT NULL,
+  dataEnvio DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (idUtilizador) REFERENCES Utilizadores(id) ON UPDATE CASCADE,
+  FOREIGN KEY (idUtilizadorDestinatario) REFERENCES Utilizadores(id) ON UPDATE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS Seguidores (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    Utilizador INTEGER NOT NULL,
+    UtilizadorSeguido INTEGER NOT NULL,
+    FOREIGN KEY (Utilizador) REFERENCES Utilizadores(id) ON UPDATE CASCADE,
+    FOREIGN KEY (UtilizadorSeguido) REFERENCES Utilizadores(id) ON UPDATE CASCADE,
+    UNIQUE(Utilizador, UtilizadorSeguido)
+    );
+CREATE TABLE IF NOT EXISTS Posts (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    visualizacoes INTEGER NOT NULL,
+    idUtilizador INTEGER NOT NULL,
+    idGrupo INTEGER NOT NULL,
+    texto TEXT,
+    imagem TEXT,
+    video TEXT,
+    data DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (idUtilizador) REFERENCES Utilizadores(id) ON UPDATE CASCADE,
+    FOREIGN KEY (idGrupo) REFERENCES Grupo(id)  ON UPDATE CASCADE ON DELETE CASCADE
+);
+CREATE TABLE IF NOT EXISTS Grupo (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    nome TEXT NOT NULL,
+    descricao TEXT NOT NULL,
+    foto TEXT NOT NULL,
+    dataCriacao datetime DEFAULT CURRENT_TIMESTAMP,
+    creator INTEGER NOT NULL,
+    statusAcesso boolean NOT NULL,
+    FOREIGN KEY (creator) REFERENCES Utilizadores(id) ON UPDATE CASCADE
+    );
+CREATE TABLE IF NOT EXISTS GrupoMembros (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    idGrupo INTEGER NOT NULL,
+    idUtilizador INTEGER NOT NULL,
+    FOREIGN KEY (idGrupo) REFERENCES Grupo(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (idUtilizador) REFERENCES Utilizadores(id) ON UPDATE CASCADE,
+    UNIQUE (idGrupo, idUtilizador)
+);
+CREATE TABLE IF NOT EXISTS GrupoModeradores (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    idGrupo INTEGER NOT NULL,
+    idUtilizador INTEGER NOT NULL,
+    FOREIGN KEY (idGrupo) REFERENCES Grupo(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (idUtilizador) REFERENCES Utilizadores(id) ON UPDATE CASCADE,
+    UNIQUE (idGrupo, idUtilizador)
+    );
+
+CREATE TABLE IF NOT EXISTS PedidosAdesao (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    idGrupo INTEGER NOT NULL,
+    idUtilizador INTEGER NOT NULL,
+    dataPedido DATETIME DEFAULT CURRENT_TIMESTAMP,
+    dataAceitacao DATETIME,
+    FOREIGN KEY (idGrupo) REFERENCES Grupo(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (idUtilizador) REFERENCES Utilizadores(id) ON UPDATE CASCADE,
+    UNIQUE (idGrupo, idUtilizador)
+);
+
+CREATE TABLE IF NOT EXISTS Partilha(
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    idPost INTEGER NOT NULL,   
+    idUtilizador INTEGER NOT NULL,
+    idUtilizadorDestino INTEGER NOT NULL,
+    FOREIGN KEY (idPost) REFERENCES Posts(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (idUtilizador) REFERENCES Utilizadores(id) ON UPDATE CASCADE,
+    FOREIGN KEY (idUtilizadorDestino) REFERENCES Utilizadores(id) ON UPDATE CASCADE
+);
+CREATE TABLE IF NOT EXISTS Gosto(
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    idPost INTEGER NOT NULL, 
+    idUtilizador INTEGER NOT NULL,
+    FOREIGN KEY (idPost) REFERENCES Posts(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (idUtilizador) REFERENCES Utilizadores(id) ON UPDATE CASCADE,
+    UNIQUE (idPost, idUtilizador)
+);
+CREATE TABLE IF NOT EXISTS Comentario(
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    idPost INTEGER NOT NULL,   
+    idUtilizador INTEGER NOT NULL,
+    data datetime DEFAULT CURRENT_TIMESTAMP,
+    conteudo TEXT NOT NULL,
+    FOREIGN KEY (idPost) REFERENCES Posts(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (idUtilizador) REFERENCES Utilizadores(id) ON UPDATE CASCADE
+);
+CREATE TABLE IF NOT EXISTS Interesses(
+    topico TEXT NOT NULL PRIMARY KEY
+);
+
+CREATE TABLE IF NOT EXISTS RecomendacoesPosts (
+  id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+  topicos TEXT NOT NULL,
+  post INTEGER NOT NULL,
+  FOREIGN KEY (post) REFERENCES Posts(id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (topicos) REFERENCES Interesses(topico),
+  UNIQUE(topicos, post)
+);
+
+CREATE TABLE IF NOT EXISTS InteressesUtilizador (
+  id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+  topicos TEXT NOT NULL,
+  utilizador INTEGER NOT NULL,
+  FOREIGN KEY (utilizador) REFERENCES Utilizadores(id) ON UPDATE CASCADE,
+  FOREIGN KEY (topicos) REFERENCES Interesses(topico),
+  UNIQUE(topicos, utilizador)
+);

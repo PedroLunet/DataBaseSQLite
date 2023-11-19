@@ -1,3 +1,4 @@
+-- I am doing database in sqlite3 to a social media  and I need you to remake this code with the improvements that you consider necessary
 PRAGMA foreign_keys = ON;
 
 DROP TABLE IF EXISTS Mensagens;
@@ -13,8 +14,6 @@ DROP TABLE IF EXISTS Comentario;
 DROP TABLE IF EXISTS RecomendacoesPosts;
 DROP TABLE IF EXISTS InteressesUtilizador;
 DROP TABLE IF EXISTS Interesses;
--- DROP TRIGGER IF EXISTS trigger_grupo_moderadores;
--- DROP TRIGGER IF EXISTS trigger_pedidos_aceites;
 DROP TABLE IF EXISTS Utilizadores;
 
 CREATE TABLE Utilizadores (
@@ -80,21 +79,14 @@ CREATE TABLE IF NOT EXISTS GrupoMembros (
     UNIQUE (idGrupo, idUtilizador)
 );
 CREATE TABLE IF NOT EXISTS GrupoModeradores (
-    id integer NOT NULL PRIMARY KEY AUTOINCREMENT,
+    id inchrome-extension://efaidnbmnnnibpcajpcglclefindmkaj/https://moodle2324.up.pt/pluginfile.php/103816/mod_resource/content/1/MD_test.pdfeger NOT NULL PRIMARY KEY AUTOINCREMENT,
     idGrupo integer NOT NULL,
     idUtilizador integer NOT NULL,
     FOREIGN KEY (idGrupo) REFERENCES Grupo(id) ON DELETE CASCADE,
     FOREIGN KEY (idUtilizador) REFERENCES Utilizadores(id),
     UNIQUE (idGrupo, idUtilizador)
     );
-/*CREATE TRIGGER IF NOT EXISTS trigger_grupo_moderadores
-    AFTER INSERT ON Grupo
-    BEGIN
-        INSERT INTO GrupoModeradores (idGrupo, idUtilizador)
-        VALUES (NEW.id, NEW.creator);
-        INSERT INTO GrupoMembros (idGrupo, idUtilizador)
-        VALUES (NEW.id, NEW.creator);
-    END;*/
+
 CREATE TABLE IF NOT EXISTS PedidosAdesao (
     id integer NOT NULL PRIMARY KEY AUTOINCREMENT,
     idGrupo INTEGER NOT NULL,
@@ -105,13 +97,7 @@ CREATE TABLE IF NOT EXISTS PedidosAdesao (
     FOREIGN KEY (idUtilizador) REFERENCES Utilizadores(id),
     UNIQUE (idGrupo, idUtilizador)
 );
-/*CREATE TRIGGER IF NOT EXISTS trigger_pedidos_aceites
-    AFTER UPDATE ON PedidosAdesao
-    WHEN PedidosAdesao.dataAceitacao IS NOT NULL
-    BEGIN
-        INSERT INTO GrupoMembros (idGrupo, idUtilizador)
-        VALUES (NEW.idGrupo, NEW.idUtilizador);
-    END;*/
+
 CREATE TABLE IF NOT EXISTS Partilha(
     id integer NOT NULL PRIMARY KEY AUTOINCREMENT,
     idPost integer NOT NULL,   
